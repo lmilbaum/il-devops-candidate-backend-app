@@ -11,7 +11,8 @@ on:
 
 env:
   AWS_REGION: eu-west-1
-  ECR_ARN: 051206567486.dkr.ecr.eu-west-1.amazonaws.com/devops-candidate
+  ECR_ARN: 051206567486.dkr.ecr.eu-west-1.amazonaws.com
+  REGISTRY_ALIAS: devops-candidate
 
 jobs:
   build:
@@ -44,7 +45,7 @@ jobs:
       - name: Build, tag, and push docker image to Amazon ECR
         env:
           REGISTRY: ${{ env.ECR_ARN }}
-          REGISTRY_ALIAS: lmilbaum
+          REGISTRY_ALIAS: ${{ env.REGISTRY_ALIAS }}
           REPOSITORY: app
         run: |
           docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY .
