@@ -9,11 +9,6 @@ on:
 
   workflow_dispatch:
 
-# env:
-#   AWS_REGION: eu-west-1
-#   ECR_ARN: 051206567486.dkr.ecr.eu-west-1.amazonaws.com
-#   REGISTRY_ALIAS: devops-candidate
-
 jobs:
   build:
     name: Build Docker image and push to Container Registry
@@ -22,37 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # - name: Set up Docker Buildx
-      #   id: buildx
-      #   uses: docker/setup-buildx-action@v2
-      
-      # - name: Build container images
-      #   run: |
-      #     docker build -t app . 
-      #     cd nginx && docker build -t nginx .
-
-      # - name: Configure AWS Credentials
-      #   uses: aws-actions/configure-aws-credentials@v1
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: ${{ env.AWS_REGION }}
-
-      # - name: Login to Amazon ECR
-      #   id: login-ecr
-      #   uses: aws-actions/amazon-ecr-login@v1
-
-      # - name: Build, tag, and push docker image to Amazon ECR
-      #   env:
-      #     REGISTRY: ${{ env.ECR_ARN }}
-      #     REGISTRY_ALIAS: ${{ env.REGISTRY_ALIAS }}
-      #     REPOSITORY: app
-      #   run: |
-      #     docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY .
-      #     docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY
-
-      - name: Build Image
-        id: build-image
+      - name: Build frontend Image
+        id: build-frontend-image
         uses: redhat-actions/buildah-build@v2
         with:
           image: frontend
@@ -64,11 +30,33 @@ jobs:
         id: push-to-registry
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: ${{ steps.build-image.outputs.image }}
-          tags: ${{ steps.build-image.outputs.tags }}
+          image: ${{ steps.build-frontend-image.outputs.image }}
+          tags: ${{ steps.build-frontend-image.outputs.tags }}
           registry: registry-1.docker.io/lmilbaum
           username: lmilbaum
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Print image url
-        run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
+      - name: Print frontend image url
+        run: echo "Image pushed to ${{ steps.push-to-registry.outputs.registry-paths }}"
+
+      - name: Build nginx Image
+        id: build-nginx-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: nginx
+          tags: latest ${{ github.sha }}
+          containerfiles: |
+            ./nginx/Dockerfile
+
+      - name: Push To Dockerhub Container Registry
+        id: push-to-registry-nginx
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-nginx-image.outputs.image }}
+          tags: ${{ steps.build-nginx-image.outputs.tags }}
+          registry: registry-1.docker.io/lmilbaum
+          username: lmilbaum
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Print nginx image url
+        run: echo "Image pushed to ${{ steps.push-to-registry-nginx.outputs.registry-paths }}"
