@@ -60,14 +60,14 @@ jobs:
           containerfiles: |
             ./Dockerfile
 
-      - name: Push To GitHub Container Registry
-        id: push-to-quay
+      - name: Push To Dockerhub Container Registry
+        id: push-to-registry
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
-          registry: ghcr.io/lmilbaum
-          username: liora@lmb.co.il
+          registry: egistry-1.docker.io/lmilbaum
+          username: lmilbaum
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Print image url
