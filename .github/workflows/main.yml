@@ -47,6 +47,7 @@ jobs:
           tags: latest ${{ github.sha }}
           containerfiles: |
             ./nginx/Dockerfile
+          context: ./nginx
 
       - name: Push To Dockerhub Container Registry
         id: push-to-registry-nginx
