@@ -52,13 +52,13 @@ jobs:
       #     docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY
 
       - name: Build Image
-          id: build-image
-          uses: redhat-actions/buildah-build@v2
-          with:
-            image: frontend
-            tags: latest ${{ github.sha }}
-            containerfiles: |
-              ./Dockerfile
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: frontend
+          tags: latest ${{ github.sha }}
+          containerfiles: |
+            ./Dockerfile
 
       - name: Push To quay.io
         id: push-to-quay
